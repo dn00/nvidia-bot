@@ -10,8 +10,8 @@ slack_config.json
 geckodriver.log
 .profile
 *.log
+__pycache__/
+*.py[cod]
 /evga_config.json
-batch.bat
-README.md
-README.md
-.gitignore
+*.pkl
+.vscode/
