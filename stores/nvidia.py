@@ -300,7 +300,7 @@ class NvidiaBuyer:
             self.get_product_ids()
             self.run_items()
 
-    def buy(self, product_id, delay=3):
+    def buy(self, product_id, delay=4):
         log.info(f"Checking stock for {product_id} at {delay} second intervals.")
         while not self.add_to_cart(product_id) and self.enabled:
             with Spinner.get("Still working...") as s:
@@ -409,6 +409,7 @@ class NvidiaBuyer:
         )
 
         if response.status_code == 200:
+            webbrowser.open_new("https://www.youtube.com/watch?v=GWXLPu8Ky9k")
             log.info(f"{self.gpu_long_name} ({product_id}) in stock!")
             return True
         elif response.status_code == 409:
