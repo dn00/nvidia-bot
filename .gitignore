@@ -11,3 +11,7 @@ geckodriver.log
 .profile
 *.log
 /evga_config.json
+batch.bat
+README.md
+README.md
+.gitignore

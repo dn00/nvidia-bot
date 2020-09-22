@@ -9,7 +9,7 @@ This project uses [Pipenv](https://pypi.org/project/pipenv/) to manage dependenc
 
 [![Alt text](https://img.youtube.com/vi/TvOQubunx6o/0.jpg)](https://www.youtube.com/watch?v=TvOQubunx6o)
 
-
+// webbrowser.open_new("https://www.youtube.com/watch?v=GWXLPu8Ky9k")
 ```
 pip install pipenv
 pipenv shell 
