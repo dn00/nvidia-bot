@@ -7,22 +7,21 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.expected_conditions import presence_of_element_located
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import NoSuchElementException
 
 from notifications.notifications import NotificationHandler
 from utils.logger import log
-from utils.selenium_utils import options, chrome_options
+from utils.selenium_utils import options, enable_headless
 
 LOGIN_URL = "https://www.amazon.com/ap/signin?openid.pape.max_auth_age=0&openid.return_to=https%3A%2F%2Fwww.amazon.com%2F%3Fref_%3Dnav_custrec_signin&openid.identity=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.assoc_handle=usflex&openid.mode=checkid_setup&openid.claimed_id=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.ns=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0&"
 
 
 class Amazon:
-    def __init__(self, username, password, debug=False):
+    def __init__(self, username, password, headless=False):
         self.notification_handler = NotificationHandler()
-        if not debug:
-            chrome_options.add_argument("--headless")
-        self.driver = webdriver.Chrome(
-            executable_path=binary_path, options=options, chrome_options=chrome_options
-        )
+        if headless:
+            enable_headless()
+        self.driver = webdriver.Chrome(executable_path=binary_path, options=options)
         self.wait = WebDriverWait(self.driver, 10)
         self.username = username
         self.password = password
@@ -70,7 +69,10 @@ class Amazon:
                 log.warn("A polling request timed out. Retrying.")
 
         log.info("Item in stock, buy now button found!")
-        price_str = self.driver.find_element_by_id("priceblock_ourprice").text
+        try:
+            price_str = self.driver.find_element_by_id("priceblock_ourprice").text
+        except NoSuchElementException as _:
+            price_str = self.driver.find_element_by_id("priceblock_dealprice").text
         price_int = int(round(float(price_str.strip("$"))))
         if price_int < price_limit:
             log.info(f"Attempting to buy item for {price_int}")

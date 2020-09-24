@@ -1,9 +1,18 @@
-# README.md
-
-Tool to help us buy a GPU in 2020
+# nvidia-bot
 
 [Installation](#Installation) | [Usage](#Usage) | [Discord](https://discord.gg/hQeUbRv)  | [Troubleshooting](#Troubleshooting)
+
+## Why???
+
+I built this in response to the severe tech scalping situation that's happening right now. Almost every tech product that's coming
+out right now is being instantly brought out by scalping groups and then resold at at insane prices. $699 GPUs are being listed
+for $1700 on eBay, and these scalpers are buying 40 carts while normal consumers can't get a single one. Preorders for the PS5 are
+being resold for nearly $1000. My take on this is that if I release a bot that anyone can use, for free, then the number of items 
+that scalpers can buy goes down and normal consumers can buy items for MSRP. If everyone is botting, then no one is botting. 
+
 ## Installation
+
+For Raspberry Pi installation and setup, go [here](#Raspberry-Pi-Setup).
 
 This project uses [Pipenv](https://pypi.org/project/pipenv/) to manage dependencies. Hop in my [Discord](https://discord.gg/hQeUbRv) if you have ideas, need help or just want to tell me about how you got your new 3080. [TerryFrench](https://github.com/TerryFrench) has also created a youtube video detailing how to get this project running on Windows 10 as well. Huge thanks to him. 
 
@@ -30,6 +39,16 @@ Commands:
   nvidia
 ```
 
+## Current Functionality
+
+| **Website** | **Auto Checkout** | **Open Cart Link** | **Test flag** |
+|:---:|:---:|:---:|:---:|
+| nvidia.com | |`✔`| |
+| amazon.com |`✔`| | |
+| bestbuy.com | |`✔`| |
+| evga.com |`✔` | |`✔`|
+
+
 ## Usage
 
 Ok now we have a basic GUI. GUIs aren't my strong suit, but pretty much the top box is the settings for amazon and
@@ -41,6 +60,11 @@ the bottom box is the settings for Nvidia.
 - Go to a product page
 - Refresh the page until the 'Buy Now' option exists
 - If the price is under the "Price Limit", it will buy the item.
+
+**Amazon flags**
+```
+--no-image : prevents images from loading on amazon webdriver
+```
 
 Example usage:
 ```
@@ -86,9 +110,13 @@ set amazon_price_limit=1000
 
 
 ### Nvidia 
-- Call Digitalriver API to get product number for the GPU selected (2060S, 3080, 3090)
-- Call Digitalriver API to check if the GPU is in stock until it is in stock
-- Will open a window in your default browser with the GPU in your cart when it is stock.
+Will check stock and open an add to cart link in your browser and send notifications.
+
+**Nvidia flags**
+```
+--test : runs a test of the checkout process, without actually making the purchase
+--interval: How many seconds between each stock check (default: 5)
+```
 
 Example usage:
 ```
@@ -96,40 +124,26 @@ python app.py nvidia
 What GPU are you after?: 3080
 What locale shall we use? [en_us]:
 ...
-19092020 12:05:46 AM : Calling https://api.digitalriver.com/v1/shoppers/me/products/5438481700/inventory-status? : DEBUG -stores.nvidia
-19092020 12:05:46 AM : Returned 200 : DEBUG -stores.nvidia
-19092020 12:05:46 AM : Stock status is PRODUCT_INVENTORY_OUT_OF_STOCK : INFO -stores.nvidia
-
+INFO: "2020-09-23 21:43:56,152 - We have 1 product IDs for NVIDIA GEFORCE RTX 3080
+INFO: "2020-09-23 21:43:56,153 - Product IDs: ['5438481700']
+INFO: "2020-09-23 21:43:56,153 - Checking stock for 5438481700 at 5 second intervals.
 ```
 
-### Nvidia Auto-Checkout Guide
-First be sure to have a [Nvidia store](https://www.nvidia.com/en-us/shop/) account with all of your infos (billing address etc ...) already filled in). 
-Then make a copy of `autobuy_config.template_json` and name it `autobuy_config.json`. Be sure to remove all the single-line comments, which are denoted with `#`.
-If this file exists and the credentials are valid, the bot will make a purchase for you.
-
+Quick run:
 ```
-{
-  "NVIDIA_LOGIN": "fuckthesc@lpers.com",        # Your NVIDIA Store login
-  "NVIDIA_PASSWORD": "12345",                   # Your NVIDIA Store password
-  "FULL_AUTOBUY":false,                         # FALSE : Fill your infos but dont click on the last button / TRUE : Buy the card
-  "CVV":"101",             # CCV code
-  "BYPASS_ADDRESS_SUGGESTION":false             # Selects the address you entered not the one suggested
-}
+python app.py nvidia --gpu 3080 --locale en_us
 ```
-
-![Nvidia Workflow Diagram](nvidia-workflow.png)
-
 
 ## Best Buy
 This is fairly basic right now. Just login to the best buy website in your default browser and then run the command as follows:
 
 ```
-app.py bestbuy --sku [SKU]
+python app.py bestbuy --sku [SKU]
 ```
 
 Example:
 ```
-app.py bestbuy --sku 6429440
+python app.py bestbuy --sku 6429440
 ```
 
 ## EVGA
@@ -138,6 +152,8 @@ Make a copy of `evga_config.template_json` to `evga_config.json`:
 {
   "username": "hari@",
   "password": "password!",
+  "card_pn": "10G-P5-3895-KR",
+  "card_series": "3080",
   "credit_card" : {
             "name": "Hari ",
             "number": "234234",
@@ -152,7 +168,18 @@ Test run command (Uses old gpu list and then stops before finishing the order)
 `python app.py evga --test`
 
 Autobuy command:
-`python app.py evga`
+`python app.py evga --model [indentifier]`
+
+These are the series: "3090" or "3080" (any should work, untested)
+
+P/N numbers can be found in URLs or on product pages such as newegg. They look like this:
+10G-P5-3895-KR
+10G-P5-3881-KR
+10G-P5-3885-KR
+![EVGA PN Screenshot](evga_pn.png)
+
+if it doesn't load the correct page title (since the 3090 isn't listed yet), it will refresh every second until the correct page is loaded.
+
 
 ### Notifications
 This uses a notifications handler that will support multiple notification channels. 
@@ -199,6 +226,18 @@ It is possible to notify multiple users at once. Just add a list as the `BOT_CHA
 }
 ```
 
+#### Pavlok
+To enable shock notifications to your [Pavlok Shockwatch](https://www.amazon.com/Pavlok-PAV2-PERIMETER-BLACK-2/dp/B01N8VJX8P?),
+store the url from the pavlok app in the ```pavlok_config.json``` file, you can copy the template from ```pavlok_config.template_json```.
+
+**WARNING:** This feature does not currently support adjusting the intensity, it will always be max (255).
+```
+{
+  "base_url": "url goes here"
+}
+```
+
+
 
 ## Troubleshooting
 
@@ -215,3 +254,33 @@ chrome_options.binary_location="C:\Users\%USERNAME%\AppData\Local\Google\Chrome\
 **Error: ```selenium.common.exceptions.SessionNotCreatedException: Message: session not created: This version of ChromeDriver only supports Chrome version 85```**
 
 You are not running the proper version of Chrome this requires. As of this update, the current version is Chrome 85. Check your version by going to ```chrome://version/``` in your browser. We are going to be targeting the current stable build of chrome. If you are behind, please update, if you are on a beta or canary branch, you'll have to build your own version of chromedriver-py.
+
+## Raspberry-Pi-Setup
+
+1. Prereqs and Setup
+```
+sudo apt update
+sudo apt upgrade
+sudo apt install chromium-chromedriver
+git clone https://github.com/Hari-Nagarajan/nvidia-bot
+cd nvidia-bot/
+pip3 install pipenv
+export PATH=$PATH:/home/<YOURUSERNAME>/.local/bin
+pipenv shell 
+pipenv install
+```
+2. Leave this Terminal window open.
+
+3. Open the following file in a text editor: 
+```
+/home/<YOURUSERNAME>/.local/share/virtualenvs/nvidia-bot-<RANDOMCHARS>/lib/python3.7/site-packages/selenium/webdriver/common/service.py
+```
+4. Edit line 38 from `self.path = executable` to `self.path = "chromedriver"`, then save and close the file.
+
+
+5. Back in Terminal...
+```
+python app.py
+```
+
+6. Follow [Usage](#Usage) to configure the bot as needed.
