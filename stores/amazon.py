@@ -1,4 +1,5 @@
 import time
+import hashlib
 
 from chromedriver_py import binary_path  # this will get you the path variable
 from selenium import webdriver
@@ -11,22 +12,37 @@ from selenium.common.exceptions import NoSuchElementException
 
 from notifications.notifications import NotificationHandler
 from utils.logger import log
-from utils.selenium_utils import options, enable_headless
+from utils.selenium_utils import options, enable_headless, wait_for_element
 
+
+BASE_URL = "https://www.amazon.com/"
 LOGIN_URL = "https://www.amazon.com/ap/signin?openid.pape.max_auth_age=0&openid.return_to=https%3A%2F%2Fwww.amazon.com%2F%3Fref_%3Dnav_custrec_signin&openid.identity=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.assoc_handle=usflex&openid.mode=checkid_setup&openid.claimed_id=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.ns=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0&"
 
 
 class Amazon:
-    def __init__(self, username, password, headless=False):
+    def __init__(self, username, password, item_url, headless=False):
         self.notification_handler = NotificationHandler()
         if headless:
             enable_headless()
+        h = hashlib.md5(item_url.encode()).hexdigest()
+        options.add_argument(f"user-data-dir=.profile-amz-{h}")
         self.driver = webdriver.Chrome(executable_path=binary_path, options=options)
         self.wait = WebDriverWait(self.driver, 10)
         self.username = username
         self.password = password
-        self.login()
-        time.sleep(3)
+        self.driver.get(BASE_URL)
+        if self.is_logged_in():
+            log.info("Already logged in")
+        else:
+            self.login()
+            time.sleep(15)
+
+    def is_logged_in(self):
+        try:
+            text = wait_for_element(self.driver, "nav-link-accountList").text
+            return "Hello, Sign in" not in text
+        except Exception:
+            return False
 
     def login(self):
         self.driver.get(LOGIN_URL)
@@ -42,11 +58,13 @@ class Amazon:
     def run_item(self, item_url, price_limit=1000, delay=3):
         log.info(f"Loading page: {item_url}")
         self.driver.get(item_url)
+        item = ""
         try:
             product_title = self.wait.until(
                 presence_of_element_located((By.ID, "productTitle"))
             )
             log.info(f"Loaded page for {product_title.text}")
+            item = product_title.text[:100].strip()
         except:
             log.error(self.driver.current_url)
 
@@ -59,7 +77,7 @@ class Amazon:
         while not self.driver.find_elements_by_xpath('//*[@id="buy-now-button"]'):
             try:
                 self.driver.refresh()
-                log.info("Refreshing page.")
+                log.info(f"Refreshing for {item}...")
                 availability = self.wait.until(
                     presence_of_element_located((By.ID, "availability"))
                 ).text.replace("\n", " ")
