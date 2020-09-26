@@ -16,9 +16,9 @@ CHECK_URL = "https://www.newegg.com/p/pl?N=100007709%20601357282"
 # CHECK_URL = "https://www.newegg.com/p/pl?d=2070"
 ATC_URL = "https://secure.newegg.com/Shopping/AddtoCart.aspx?Submit=ADD&ItemList="
 CART_URL = "https://secure.newegg.com/Shopping/ShoppingCart.aspx?Submit=view"
-ATC_TEXT = "add to cart"
+ATC_TEXT_LOWERCASE = "add to cart"
 
-List = {'N82E16814126453', 'N82E16814487518', 'N82E16814126452', 'N82E16814487519', 'N82E16814487521'}
+List = {'N82E16814126453', 'N82E16814487518', 'N82E16814137597', 'N82E16814126452', 'N82E16814487519', 'N82E16814487521'}
 
 class NeweggChecker:
     def __init__(self, headless, delay):
@@ -33,18 +33,19 @@ class NeweggChecker:
 
         while True:
             item_containors = self.driver.find_elements(By.CLASS_NAME, "item-container")
+            log.info(f'{len(item_containors)} items found. Checking stock...')
             productIds = []
             for item in item_containors:
-                log.info(item.find_element(By.CLASS_NAME, "item-title"))
+                # log.info(item.find_element(By.CLASS_NAME, "item-title"))
                 if (self.is_atc(item)):
-                    title_a = item.find_element(By.CLASS_NAME, "item-title")
+                    # title_a = item.find_element(By.CLASS_NAME, "item-title")
                     productId = item.find_element(By.CLASS_NAME, "item-title").get_attribute("href").rpartition('/')[-1]
-                    log.info(f"{title_a.text} - {productId} IN STOCK")
                     productIds.append(productId)
-                    
+                     
             log.info(productIds)
             topPid = [x for x in List if x in productIds]
             if (len(topPid) > 0):
+                webbrowser.open("https://www.youtube.com/watch?v=GWXLPu8Ky9k")
                 webbrowser.open(f'{ATC_URL}{topPid[0]}')
                 time.sleep(0.5)
                 webbrowser.open(f'{CART_URL}')
@@ -56,9 +57,8 @@ class NeweggChecker:
     def is_atc(self, item):
         try:
             button = item.find_element(By.CSS_SELECTOR, "button")
-            if button.text.lower() == ATC_TEXT:
+            if button.text.lower() == ATC_TEXT_LOWERCASE:
                 return True
             return False
         except Exception:
-            print(Exception)
             return False
