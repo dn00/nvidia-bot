@@ -5,6 +5,7 @@ from stores.amazon import Amazon
 from stores.bestbuy import BestBuyHandler
 from stores.evga import Evga
 from stores.nvidia import NvidiaBuyer, GPU_DISPLAY_NAMES, CURRENCY_LOCALE_MAP
+from stores.newegg_checker import NeweggChecker
 from utils import selenium_utils
 
 
@@ -59,8 +60,15 @@ def evga(test, headless):
     ev = Evga(headless)
     ev.buy(test=test)
 
+@click.command()
+@click.option("--delay", default=5)
+@click.option("--headless", is_flag=True)
+def neweggchecker(delay, headless):
+    ne = NeweggChecker(headless, delay)
+    ne.check()
 
 main.add_command(nvidia)
 main.add_command(amazon)
 main.add_command(bestbuy)
 main.add_command(evga)
+main.add_command(neweggchecker)
