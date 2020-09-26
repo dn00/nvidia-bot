@@ -31,7 +31,25 @@ python app.py
 
 Usage: app.py [OPTIONS] COMMAND [ARGS]...
 
-Options:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+:
   --help  Show this message and exit.
 
 Commands:

@@ -11,6 +11,12 @@ from utils.selenium_utils import options, enable_headless, wait_for_element
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 
+options = Options()
+options.page_load_strategy = "eager"
+options.add_experimental_option("excludeSwitches", ["enable-automation"])
+options.add_experimental_option("useAutomationExtension", False)
+prefs = {"profile.managed_default_content_settings.images": 2}
+
 # CHECK_URL = "https://www.newegg.com/p/pl?N=100007709%20601357282%20601321572"
 CHECK_URL = "https://www.newegg.com/p/pl?N=100007709%20601357282"
 # CHECK_URL = "https://www.newegg.com/p/pl?d=2070"
