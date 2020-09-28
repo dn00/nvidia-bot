@@ -6,6 +6,7 @@ from stores.bestbuy import BestBuyHandler
 from stores.evga import Evga
 from stores.nvidia import NvidiaBuyer, GPU_DISPLAY_NAMES, CURRENCY_LOCALE_MAP
 from stores.newegg_checker import NeweggChecker
+from stores.amazon_checker import AmazonChecker
 from utils import selenium_utils
 
 
@@ -17,6 +18,7 @@ def main():
 @click.command()
 @click.option(
     "--gpu",
+
     type=click.Choice(GPU_DISPLAY_NAMES, case_sensitive=False),
     prompt="What GPU are you after?",
     cls=QuestionaryOption,
@@ -67,8 +69,17 @@ def neweggchecker(delay, headless):
     ne = NeweggChecker(headless, delay)
     ne.check()
 
+@click.command()
+@click.option("--delay", default=5)
+@click.option("--headless", is_flag=True)
+def amazonchecker(delay, headless):
+    az = AmazonChecker(headless, delay)
+    az.check()
+
+
 main.add_command(nvidia)
 main.add_command(amazon)
 main.add_command(bestbuy)
 main.add_command(evga)
 main.add_command(neweggchecker)
+main.add_command(amazonchecker)

@@ -130,9 +130,9 @@ class Amazon:
         log.info("Checking stock for items.")
         while not self.something_in_stock():
             time.sleep(delay)
-        self.notification_handler.send_notification(
-            "Your items on Amazon.com were found!"
-        )
+        # self.notification_handler.send_notification(
+        #     "Your items on Amazon.com were found!"
+        # )
         self.checkout(test=test)
 
     def something_in_stock(self):

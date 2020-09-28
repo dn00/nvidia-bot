@@ -17,12 +17,9 @@ options.page_load_strategy = "eager"
 options.add_argument('user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.84 Safari/537.36')
 # options.add_experimental_option("excludeSwitches", ["enable-automation"])
 # options.add_experimental_option("useAutomationExtension", False)
-# prefs = {"profile.managed_default_content_settings.images": 2}
+prefs = {"profile.managed_default_content_settings.images": 2}
+options.add_experimental_option("prefs", prefs)
 
-DEFAULT_HEADERS = {
-    "Accept": "application/json",
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36",
-}
 
 # CHECK_URL = "https://www.newegg.com/p/pl?N=100007709%20601357282%20601321572"
 CHECK_URL = "https://www.newegg.com/p/pl?N=100007709%20601357282"
